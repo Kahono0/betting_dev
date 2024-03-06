@@ -37,7 +37,7 @@ defmodule Bet.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(role: :permissions)
 
   @doc """
   Creates a user.
@@ -85,7 +85,7 @@ defmodule Bet.Accounts do
       iex> assign_role(user, bad_role)
       {:error, %Ecto.Changeset{}}
   """
-  def assign_role(%User{} = user, %Bet.Accounts.Role{} = role) do
+  def assign_role(%User{} = user, %Role{} = role) do
     user
     |> User.assign_role_changeset(role)
     |> Repo.update()
@@ -119,12 +119,11 @@ defmodule Bet.Accounts do
       iex> assign_permission(role, bad_permission)
       {:error, %Ecto.Changeset{}}
   """
-  def assign_permission(%Role{} = role, %Bet.Accounts.Permission{} = permission) do
-    role
-    |> Role.assign_permission_changeset(permission)
+  def assign_permission(%Role{} = role, %Permission{} = permission) do
+    permission
+    |> Permission.assign_role_changeset(role)
     |> Repo.update()
   end
-
 
   @doc """
   Updates a user.
