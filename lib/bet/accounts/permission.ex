@@ -14,5 +14,7 @@ defmodule Bet.Accounts.Permission do
     permission
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> validate_length(:name, min: 3)
+    |> unique_constraint(:name)
   end
 end

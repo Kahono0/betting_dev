@@ -7,6 +7,8 @@ defmodule Bet.Accounts do
   alias Bet.Repo
 
   alias Bet.Accounts.User
+  alias Bet.Accounts.Role
+  alias Bet.Accounts.Permission
 
   @doc """
   Returns the list of users.
@@ -54,6 +56,75 @@ defmodule Bet.Accounts do
     |> User.changeset(attrs)
     |> Repo.insert()
   end
+
+  @doc """
+  Creates a role.
+
+  ## Examples
+
+      iex> create_role(%{name: "admin"})
+      {:ok, %Role{}}
+
+      iex> create_role(%{})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_role(attrs \\ %{}) do
+    %Role{}
+    |> Role.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Assigns a role to a user.
+
+  ## Examples
+
+      iex> assign_role(user, role)
+      {:ok, %User{}}
+
+      iex> assign_role(user, bad_role)
+      {:error, %Ecto.Changeset{}}
+  """
+  def assign_role(%User{} = user, %Bet.Accounts.Role{} = role) do
+    user
+    |> User.assign_role_changeset(role)
+    |> Repo.update()
+  end
+
+  @doc """
+  Creates a permission.
+
+  ## Examples
+
+      iex> create_permission(%{name: "create_user"})
+      {:ok, %Permission{}}
+
+      iex> create_permission(%{})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_permission(attrs \\ %{}) do
+    %Permission{}
+    |> Permission.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Assigns a permission to a role.
+
+  ## Examples
+
+      iex> assign_permission(role, permission)
+      {:ok, %Role{}}
+
+      iex> assign_permission(role, bad_permission)
+      {:error, %Ecto.Changeset{}}
+  """
+  def assign_permission(%Role{} = role, %Bet.Accounts.Permission{} = permission) do
+    role
+    |> Role.assign_permission_changeset(permission)
+    |> Repo.update()
+  end
+
 
   @doc """
   Updates a user.
