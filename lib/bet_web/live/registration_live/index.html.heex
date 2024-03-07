@@ -1,0 +1,16 @@
+<div class="mx-auto">
+  <h1 class="text-2xl text-center mb-4"><%= @page_title %></h1>
+  <div class="mx-auto border b-2 rounded p-4">
+    <%!-- render form --%>
+    <.simple_form for={@form} phx-submit="submit">
+      <.input field={@form[:first_name]} type="text" label="first name" />
+      <.input field={@form[:last_name]} type="text" label="last name" />
+      <.input field={@form[:email]} type="email" label="email" />
+      <.input field={@form[:msisdn]} type="tel" label="msisdn" />
+      <.input field={@form[:password]} type="password" label="password" />
+      <.input field={@form[:password_confirmation]} type="password" label="password confirmation" />
+      <.button type="submit">Submit</.button>
+      <p>Already have an account? <a class="text-blue-500 font-normal underline" href={~p"/login"}>Login</a></p>
+    </.simple_form>
+  </div>
+</div>

@@ -1,9 +1,10 @@
-defmodule Bet.Repo.Migrations.CreateRoles do
+defmodule Bet.Repo.Migrations.CreateSports do
   use Ecto.Migration
 
   def change do
-    create table(:roles) do
+    create table(:sports) do
       add :name, :string
+      add :description, :string
 
       timestamps(type: :utc_datetime)
     end

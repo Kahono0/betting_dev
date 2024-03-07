@@ -1,25 +1,44 @@
 <header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
+  <div class="flex items-center justify-between py-6 px-2 text-md lg:text-xl mt-4">
+    <div class="flex items-center space-x-4">
+      <a href="/" class="font-bold text-zinc-900 flex justify-center items-center">
+        Bet <img src="data:image/jpeg;base64,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" alt="Bet" class="w-8 h-8" />
       </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
+      <a href="/dashboard" class="text-zinc-600 hover:text-zinc-900">Matches</a>
+      <a href="/users" class="text-zinc-600 hover:text-zinc-900">Bets</a>
     </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
+    <div class="flex items-center space-x-4">
+      <a href="/profile" class="text-zinc-600 hover:text-zinc-900">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+          />
+        </svg>
       </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
+      <a href="/logout" class="text-zinc-600 hover:text-zinc-900">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+          />
+        </svg>
       </a>
     </div>
   </div>

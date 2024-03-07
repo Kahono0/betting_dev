@@ -1,6 +1,31 @@
 defmodule BetWeb.Router do
   use BetWeb, :router
 
+  def user_auth(conn, _opts) do
+    current_user = conn.assigns[:current_user]
+    IO.inspect(current_user, label: "current_user")
+    if current_user.role.name == "frontend-access" do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must be logged in as a user to access this page")
+      |> redirect(to: "/login")
+      |> halt()
+    end
+  end
+
+  def admin_auth(conn, _opts) do
+    current_user = conn.assigns[:current_user]
+    if current_user.role.name == "admin" do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must be logged in as an admin to access this page")
+      |> redirect(to: "/login")
+      |> halt()
+    end
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +33,15 @@ defmodule BetWeb.Router do
     plug :put_root_layout, html: {BetWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+
+  end
+
+  pipeline :auth do
+    plug BetWeb.Auth
+  end
+
+  pipeline :users_auth do
+
   end
 
   pipeline :api do
@@ -19,9 +53,16 @@ defmodule BetWeb.Router do
 
     get "/", PageController, :home
 
-    live "/registration", RegistrationLive.Index, :new
+    live "/signup", RegistrationLive.Index, :new
     live "/login", LoginLive.Index, :new
 
+    post "/users/login", UsersLoginController, :login
+  end
+
+  scope "/users", BetWeb do
+    pipe_through [:browser, :auth, :user_auth]
+
+    live "/", UsersLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

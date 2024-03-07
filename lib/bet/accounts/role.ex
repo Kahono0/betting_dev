@@ -18,5 +18,4 @@ defmodule Bet.Accounts.Role do
     |> validate_length(:name, min: 3)
     |> unique_constraint(:name)
   end
-
 end

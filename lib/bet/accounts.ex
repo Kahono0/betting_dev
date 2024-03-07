@@ -40,6 +40,16 @@ defmodule Bet.Accounts do
   def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(role: :permissions)
 
   @doc """
+  Gets a single user by token.
+  """
+  def get_user_by_token(token) do
+    case token do
+      nil -> nil
+      _ -> Repo.get_by(User, session: token) |> Repo.preload(role: :permissions)
+    end
+  end
+
+  @doc """
   Gets a single role.
 
   Raises `Ecto.NoResultsError` if the Role does not exist.
@@ -56,6 +66,21 @@ defmodule Bet.Accounts do
 
   def get_role_by_name(name) do
     Repo.get_by(Role, name: name)
+  end
+
+  @doc """
+  Check if a user has a role.
+
+  ## Examples
+
+      iex> has_role(user, role)
+      true
+
+      iex> has_role(user, bad_role)
+      false
+  """
+  def has_role(user, role) do
+    user.role_id == role.id
   end
 
   @doc """
@@ -106,16 +131,33 @@ defmodule Bet.Accounts do
   def authenticate_user(user_params) do
     email = user_params["email"]
     password = user_params["password"]
+    IO.puts("email: #{email} and password: #{password}")
     user = Repo.get_by(User, email: email)
 
     case user do
-      nil -> {:error, User.changeset(%User{}, %{})}
+      nil ->
+        {:error, User.changeset(%User{}, %{})}
+
       _ ->
-        case Bcrypt.verify_pass(password, user.password) do
-          true -> {:ok, user}
+        case is_valid_password?(password, user) do
+          true -> {:ok, create_new_token(user)}
           false -> {:error, %{}}
         end
     end
+  end
+
+  defp create_new_token(user) do
+    token = :crypto.strong_rand_bytes(128) |> Base.encode64()
+
+    user
+      |> User.changeset(%{session: token})
+      |> Repo.update()
+
+    token
+  end
+
+  defp is_valid_password?(password, user) do
+    Bcrypt.verify_pass(password, user.password)
   end
 
   @doc """
