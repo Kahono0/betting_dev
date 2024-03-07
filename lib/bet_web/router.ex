@@ -18,6 +18,10 @@ defmodule BetWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/registration", RegistrationLive.Index, :new
+    live "/login", LoginLive.Index, :new
+
   end
 
   # Other scopes may use custom stacks.

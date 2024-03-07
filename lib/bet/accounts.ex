@@ -40,6 +40,25 @@ defmodule Bet.Accounts do
   def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(role: :permissions)
 
   @doc """
+  Gets a single role.
+
+  Raises `Ecto.NoResultsError` if the Role does not exist.
+
+  ## Examples
+
+      iex> get_role!(123)
+      %Role{}
+
+      iex> get_role!(456)
+      ** (Ecto.NoResultsError)
+  """
+  def get_role!(id), do: Repo.get!(Role, id) |> Repo.preload(:permissions)
+
+  def get_role_by_name(name) do
+    Repo.get_by(Role, name: name)
+  end
+
+  @doc """
   Creates a user.
 
   ## Examples
@@ -72,6 +91,31 @@ defmodule Bet.Accounts do
     %Role{}
     |> Role.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Authenticates a user.
+
+  ## Examples
+
+      iex> authenticate_user(%{email: "user@example.com", password: "password"})
+      {:ok, %User{}}
+
+
+  """
+  def authenticate_user(user_params) do
+    email = user_params["email"]
+    password = user_params["password"]
+    user = Repo.get_by(User, email: email)
+
+    case user do
+      nil -> {:error, User.changeset(%User{}, %{})}
+      _ ->
+        case Bcrypt.verify_pass(password, user.password) do
+          true -> {:ok, user}
+          false -> {:error, %{}}
+        end
+    end
   end
 
   @doc """
