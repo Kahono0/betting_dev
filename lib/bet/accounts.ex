@@ -20,7 +20,8 @@ defmodule Bet.Accounts do
 
   """
   def list_users do
-    Repo.all(User)
+    # all users where deleted_at is null
+    Repo.all(from u in User, where: is_nil(u.deleted_at), preload: [:role])
   end
 
   @doc """
@@ -44,9 +45,37 @@ defmodule Bet.Accounts do
   """
   def get_user_by_token(token) do
     case token do
-      nil -> nil
-      _ -> Repo.get_by(User, session: token) |> Repo.preload(role: :permissions)
+      nil ->
+        nil
+
+      _ ->
+        case Repo.get_by(User, session: token) |> Repo.preload(role: :permissions) do
+          nil ->
+            nil
+
+            user -> case(user.deleted_at) do
+              nil -> user
+              _ -> nil
+            end
+        end
     end
+  end
+
+  @doc """
+  Get a single user and return error
+  """
+  def get_user(id) do
+    case id do
+      nil -> nil
+      _ -> Repo.get(User, id) |> Repo.preload(role: :permissions)
+    end
+  end
+
+  @doc """
+  Lists all roles.
+  """
+  def list_roles do
+    Repo.all(Role) |> Repo.preload([:permissions, :users])
   end
 
   @doc """
@@ -102,6 +131,17 @@ defmodule Bet.Accounts do
   end
 
   @doc """
+  Updates a user.
+  """
+  def update_user(attrs) do
+    user = get_user!(attrs["id"])
+
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Creates a role.
 
   ## Examples
@@ -116,6 +156,31 @@ defmodule Bet.Accounts do
     %Role{}
     |> Role.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Updates a role.
+  """
+  def update_role(role, attrs) do
+    role
+    |> Role.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a role.
+  """
+  def delete_role(role) do
+    Repo.delete(role)
+  end
+
+  @doc """
+  Revokes a role from a user.
+  """
+  def revoke_admin(user) do
+    user
+    |> User.changeset(%{role_id: nil})
+    |> Repo.update()
   end
 
   @doc """
@@ -150,8 +215,8 @@ defmodule Bet.Accounts do
     token = :crypto.strong_rand_bytes(128) |> Base.encode64()
 
     user
-      |> User.changeset(%{session: token})
-      |> Repo.update()
+    |> User.changeset(%{session: token})
+    |> Repo.update()
 
     token
   end
@@ -192,6 +257,36 @@ defmodule Bet.Accounts do
     %Permission{}
     |> Permission.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  List all permissions.
+  """
+  def list_permissions do
+    Repo.all(Permission) |> Repo.preload(:role)
+  end
+
+  @doc """
+  Gets a single permission.
+  """
+  def get_permission!(id) do
+    Repo.get!(Permission, id)
+  end
+
+  @doc """
+  Updates a permission.
+  """
+  def update_permission(permission, attrs) do
+    permission
+    |> Permission.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a permission.
+  """
+  def delete_permission(permission) do
+    Repo.delete(permission)
   end
 
   @doc """
@@ -242,7 +337,9 @@ defmodule Bet.Accounts do
 
   """
   def delete_user(%User{} = user) do
-    Repo.delete(user)
+    user
+    |> User.changeset(%{deleted_at: DateTime.utc_now()})
+    |> Repo.update()
   end
 
   @doc """

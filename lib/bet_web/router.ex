@@ -1,9 +1,10 @@
 defmodule BetWeb.Router do
+  alias BetWeb.AdminLive
   use BetWeb, :router
 
   def user_auth(conn, _opts) do
     current_user = conn.assigns[:current_user]
-    IO.inspect(current_user, label: "current_user")
+
     if current_user.role.name == "frontend-access" do
       conn
     else
@@ -16,7 +17,8 @@ defmodule BetWeb.Router do
 
   def admin_auth(conn, _opts) do
     current_user = conn.assigns[:current_user]
-    if current_user.role.name == "admin" do
+
+    if current_user.role.name == "admin" || current_user.role.name == "superuser" do
       conn
     else
       conn
@@ -33,7 +35,6 @@ defmodule BetWeb.Router do
     plug :put_root_layout, html: {BetWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-
   end
 
   pipeline :auth do
@@ -41,7 +42,6 @@ defmodule BetWeb.Router do
   end
 
   pipeline :users_auth do
-
   end
 
   pipeline :api do
@@ -63,6 +63,16 @@ defmodule BetWeb.Router do
     pipe_through [:browser, :auth, :user_auth]
 
     live "/", UsersLive.Index, :index
+    live "/bets", UsersLive.Bets, :index
+  end
+
+  scope "/admin" do
+    pipe_through [:browser, :auth, :admin_auth]
+
+    live "/", AdminLive.Index, :index
+    live "/sports", AdminLive.Sports, :index
+    live "/bets/:id", AdminLive.ViewBets
+    live "/profits", AdminLive.Profits
   end
 
   # Other scopes may use custom stacks.
@@ -83,7 +93,7 @@ defmodule BetWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: BetWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      # forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

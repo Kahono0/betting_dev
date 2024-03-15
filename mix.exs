@@ -19,7 +19,7 @@ defmodule Bet.MixProject do
   def application do
     [
       mod: {Bet.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp]
     ]
   end
 
@@ -51,14 +51,17 @@ defmodule Bet.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"}
+      {:bandit, "~> 1.2"},
+      {:ecto_soft_delete, "~> 1.0"},
+      {:oban, "~> 2.17"},
+      {:bamboo_smtp, "~> 4.1.0"},
+      {:timex, "~> 3.0"}
     ]
   end
 

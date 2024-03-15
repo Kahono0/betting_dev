@@ -3,3 +3,11 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+.tooltip {
+    @apply invisible absolute;
+  }
+
+.has-tooltip:hover .tooltip {
+    @apply visible z-50;
+  }
+

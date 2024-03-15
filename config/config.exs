@@ -29,7 +29,7 @@ config :bet, BetWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :bet, Bet.Mailer, adapter: Swoosh.Adapters.Local
+# config :bet, Bet.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
@@ -60,6 +60,26 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# configs for oban
+config :bet, Oban,
+  repo: Bet.Repo,
+  queues: [
+    events: [limit: 1000],
+    default: 10
+  ]
+
+config :bet, Bet.Mailer,
+  adapter: Bamboo.SMTPAdapter,
+  server: "smtp.mailgun.org",
+  port: 587,
+  username: System.get_env("SMTP_USERNAME"),
+  password: System.get_env("SMTP_PASSWORD"),
+  # can be `:always` or `:never`
+  tls: :never,
+  # can be `true`
+  ssl: false,
+  retries: 2
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

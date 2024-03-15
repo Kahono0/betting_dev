@@ -14,6 +14,7 @@ defmodule Bet.Application do
       {Phoenix.PubSub, name: Bet.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Bet.Finch},
+      {Oban, oban_config()},
       # Start a worker by calling: Bet.Worker.start_link(arg)
       # {Bet.Worker, arg},
       # Start to serve requests, typically the last entry
@@ -32,5 +33,9 @@ defmodule Bet.Application do
   def config_change(changed, _new, removed) do
     BetWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp oban_config() do
+    Application.fetch_env!(:bet, Oban)
   end
 end

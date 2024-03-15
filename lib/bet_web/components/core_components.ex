@@ -18,6 +18,7 @@ defmodule BetWeb.CoreComponents do
 
   alias Phoenix.LiveView.JS
   import BetWeb.Gettext
+  alias Bet.Placement
 
   @doc """
   Renders a modal.
@@ -595,6 +596,141 @@ defmodule BetWeb.CoreComponents do
   def icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
+    """
+  end
+
+  defp to_local_time(t) do
+    case DateTime.shift_zone(t, "Africa/Nairobi") do
+      {:ok, dt} -> dt
+      {:error, _} -> t
+    end
+  end
+
+  @doc """
+  Renders a bet slip
+
+  ## Examples
+
+      <.bet_slip slip={@slip} />
+  """
+  attr :slips, :any, required: true
+  attr :is_admin, :boolean, default: false
+  attr :can_edit, :boolean, default: false
+  attr :changeset, :any, default: nil
+  attr :current_user, :any, default: nil
+
+  def bet_slip(assigns) do
+    ~H"""
+    <%= for slip <- @slips do %>
+      <div
+        class=" p-4 m-4 border rounded-lg cursor-pointer hover:bg-gray-100"
+        phx-target="#bet_slip_#{slip.id}"
+        phx-click={show_modal("bet_slip_#{slip.id}")}
+      >
+        <div class="flex flex-row justify-between items-center">
+          <.modal id={"bet_slip_#{slip.id}"}>
+            <div class="flex flex-col justify-between h-full">
+              <div class="p-8 overflow-auto">
+                <%= for odd <- slip.odds do %>
+                  <div class="flex justify-between mt-4 border rounded-lg p-4 ">
+                    <div class="font-bold">
+                      <p><%= odd.match.home %></p>
+                      <p><%= odd.match.away %></p>
+                      <% fmt_from = DateTime.to_string(odd.match.starts) %>
+                      <% fmt_to = DateTime.to_string(odd.match.ends) %>
+                      <p class="text-sm text-gray-500 font-medium">
+                        <%= fmt_from %> - <br /><%= fmt_to %>
+                      </p>
+                    </div>
+                    <div>
+                      <p class="uppercase mb-4"><%= odd.name %></p>
+                      <p><%= odd.odd %></p>
+                    </div>
+                    <div class="h-full flex items-center">
+                      <%= case odd.status do %>
+                        <%!-- active | won | lost --%>
+                        <% "active" -> %>
+                          <span class="px-4 py-0 text-white bg-blue-500 rounded-lg">Active</span>
+                        <% "won" -> %>
+                          <span class="px-4 py-0 text-white bg-green-500 rounded-lg">Won</span>
+                        <% _ -> %>
+                          <span class="px-4 py-0 text-white bg-red-500 rounded-lg">Lost</span>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              <div>
+                <div class="w-full flex justify-between gap-4 h-fit">
+                  <%= if Placement.can_cancel_slip?(slip, @current_user) do %>
+                    <.simple_form :let={f} for={@changeset} phx-change="update_stake">
+                      <.input type="number" field={f[:stake]} label="Stake amount" />
+                    </.simple_form>
+                  <% end %>
+                  <div class="flex flex-col justify-center">
+                    <p class="mt-12">Total odds <%= slip.total_odds %></p>
+                    <p class="">
+                      Possible payout <%= Float.floor(slip.stake * slip.total_odds, 2) %>
+                    </p>
+                  </div>
+                </div>
+                <%= if Placement.can_cancel_slip?(slip, @current_user) do %>
+                  <div class="w-full flex justify-center mt-4">
+                    <button
+                      class="px-16 py-3 bg-green-500 rounded-lg text-white hover:bg-green-600"
+                      phx-click="place_bet"
+                    >
+                      Place bet
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </.modal>
+          <div class="flex flex-col justify-center items-center">
+            <p class="font-medium">Stake</p>
+            <p><%= slip.stake %> Ksh</p>
+          </div>
+          <div class="flex flex-col justify-center items-center">
+            <p class="font-medium">Total odds</p>
+            <p>X <%= slip.total_odds %></p>
+          </div>
+          <div class="flex flex-col justify-center items-center">
+            <p class="font-medium">Possible payout</p>
+            <p><%= slip.payout %> Ksh</p>
+          </div>
+          <div class="flex flex-col justify-center items-center">
+            <%= case slip.status do %>
+              <% "pending" -> %>
+                <p class="text-yellow-700 font-bold">Pending</p>
+              <% "open" -> %>
+                <p class="text-green-700 font-bold">Open</p>
+              <% "placed" -> %>
+                <p class="text-blue-700 font-bold">Placed</p>
+              <% "lost" -> %>
+                <p class="text-red-700 font-bold">Lost</p>
+              <% "won" -> %>
+                <p class="text-green-700 font-bold">Won</p>
+              <% "cancelled" -> %>
+                <p class="text-red-700 font-bold">Cancelled</p>
+            <% end %>
+          </div>
+          <%= if Placement.can_cancel_slip?(slip, @current_user) do %>
+            <div
+              class="text-white bg-red-500 rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+              phx-click="cancel_bet"
+              phx-value-id={slip.id}
+            >
+              X
+            </div>
+          <% else %>
+            <div class="w-5 h-5"></div>
+          <% end %>
+        </div>
+        <div class="text-gray-500 mt-4">Start time: <%= to_local_time(slip.start) %></div>
+        <div class="text-gray-500 text-md">End time: <%= to_local_time(slip.end) %></div>
+      </div>
+    <% end %>
     """
   end
 

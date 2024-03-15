@@ -1,0 +1,92 @@
+<div class="w-1/2 mx-56  overflow-y-auto">
+  <h1 class="text-2xl text-center font-bold p-8">Matches</h1>
+  <%= for match <- @matches do %>
+    <div class="p-4 border rounded mt-4 hover:bg-gray-100">
+      <h1 class="font-bold text-lg"><%= match.home %> vs <%= match.away %></h1>
+      <div class="flex justify-around">
+        <%= for odd <- match.odds do %>
+          <div class="flex flex-col items-center w-fit mt-4 gap-2">
+            <span class="text-md capitalize"><%= odd.name %></span>
+            <%= if odd.id in @odd_ids do %>
+              <span
+                class="text-xl px-6 p-1 border rounded-full cursor-pointer bg-green-500"
+                phx-click="choose_odd"
+                phx-value-id={odd.id}
+              >
+                <%= odd.odd %>
+              </span>
+            <% else %>
+              <span
+                class="text-xl px-6 p-1 border rounded-full cursor-pointer"
+                phx-click="choose_odd"
+                phx-value-id={odd.id}
+              >
+                <%= odd.odd %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+<div class="w-[40rem] h-[50rem] fixed top-32 right-12 border-2 rounded-lg p-8">
+  <%= if @slip.odds == [] do %>
+    <div class="h-full w-full flex items-center justify-center">
+      You have not picked any odds
+    </div>
+  <% else %>
+    <h1 class="text-xl font-bold text-center">Your picks</h1>
+    <div class="flex flex-col justify-between h-full">
+      <div class="p-8 overflow-auto">
+        <%= for odd <- @slip.odds do %>
+          <div class="flex justify-between mt-4 border rounded-lg p-4 ">
+            <div class="font-bold">
+              <p><%= odd.match.home %></p>
+              <p><%= odd.match.away %></p>
+              <% fmt_from = DateTime.to_string(odd.match.starts) %>
+              <% fmt_to = DateTime.to_string(odd.match.ends) %>
+              <p class="text-sm text-gray-500 font-medium">
+                <%= fmt_from %> - <br /><%= fmt_to %>
+              </p>
+            </div>
+            <div>
+              <p class="uppercase mb-4"><%= odd.name %></p>
+              <p><%= odd.odd %></p>
+            </div>
+            <div class="h-full flex items-center">
+              <%= case odd.status do %>
+                <%!-- active | won | lost --%>
+                <% "active" -> %>
+                  <span class="px-4 py-0 text-white bg-blue-500 rounded-lg">Active</span>
+                <% "won" -> %>
+                  <span class="px-4 py-0 text-white bg-green-500 rounded-lg">Won</span>
+                <% _ -> %>
+                  <span class="px-4 py-0 text-white bg-red-500 rounded-lg">Lost</span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      <div>
+        <div class="w-full flex justify-between gap-4 h-fit">
+          <.simple_form :let={f} for={@changeset} phx-change="update_stake">
+            <.input type="number" field={f[:stake]} label="Stake amount" />
+          </.simple_form>
+          <div class="flex flex-col justify-center">
+            <p class="mt-12">Total odds <%= @total_odds %></p>
+            <p class="">Possible payout <%= Float.floor(@slip.stake * @total_odds, 2) %></p>
+          </div>
+        </div>
+        <div class="w-full flex justify-center mt-4">
+          <button
+            class="px-16 py-3 bg-green-500 rounded-lg text-white hover:bg-green-600"
+            phx-click="place_bet"
+          >
+            Place bet
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

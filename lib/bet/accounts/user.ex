@@ -10,6 +10,7 @@ defmodule Bet.Accounts.User do
     field :msisdn, :string
     field :password, :string
     field :session, :string
+    field :deleted_at, :utc_datetime
     belongs_to :role, Bet.Accounts.Role
 
     timestamps(type: :utc_datetime)
@@ -18,7 +19,16 @@ defmodule Bet.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:first_name, :last_name, :email, :msisdn, :password, :session])
+    |> cast(attrs, [
+      :first_name,
+      :last_name,
+      :email,
+      :msisdn,
+      :password,
+      :session,
+      :role_id,
+      :deleted_at
+    ])
     |> validate_required([:first_name, :last_name, :email, :msisdn, :password])
     |> validate_format(:email, ~r/@/)
     |> validate_length(:password, min: 8)
@@ -52,5 +62,4 @@ defmodule Bet.Accounts.User do
     |> cast(%{role_id: role.id}, [:role_id])
     |> validate_required([:role_id])
   end
-
 end

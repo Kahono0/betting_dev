@@ -12,8 +12,8 @@ defmodule Bet.Accounts.Permission do
   @doc false
   def changeset(permission, attrs) do
     permission
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :role_id])
+    |> validate_required([:name, :role_id])
     |> validate_length(:name, min: 3)
     |> unique_constraint(:name)
   end
